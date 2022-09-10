@@ -6,16 +6,21 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 )
 
 const baseURL = "https://slack.com/api/"
 
 type Client struct {
-	token string
+	token       string
+	commandLock sync.Mutex
+	commandMap  map[string]CommandHandler
 }
 
 func NewClient(token string) (*Client, error) {
-	return &Client{token}, nil
+	return &Client{
+		token: token,
+	}, nil
 }
 
 func (c *Client) request(method string, path string, data interface{}) error {
