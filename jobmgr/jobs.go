@@ -30,22 +30,22 @@ type Job struct {
 }
 
 type jobResponse struct {
-	Status string  `json:"status"`
-	Job    Job     `json:"job"`
-	Result *string `json:"result"`
-	// Artifacts []data.Artifact `json:"artifacts"`
+	Status    string     `json:"status"`
+	Job       Job        `json:"job"`
+	Result    *string    `json:"result"`
+	Artifacts []Artifact `json:"artifacts"`
 }
 
-func (c *Client) GetJob(jobID JobID) (Job, error) {
+func (c *Client) GetJob(jobID JobID) (Job, *string, []Artifact, error) {
 	var response jobResponse
 	err := c.request(http.MethodGet, "jobs/get", url.Values{
 		"id": []string{strconv.Itoa(int(jobID))},
 	}, &response)
 	if err != nil {
-		return Job{}, err
+		return Job{}, nil, nil, err
 	}
 
-	return response.Job, nil
+	return response.Job, response.Result, response.Artifacts, nil
 }
 
 func (c *Client) StartJob(name string, parameters map[string]string) (JobID, error) {
