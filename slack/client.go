@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"strings"
@@ -68,20 +69,74 @@ func (c *Client) request(method string, path string, data interface{}, result in
 	defer resp.Body.Close()
 
 	if result != nil {
-		body, err := io.ReadAll(resp.Body)
+		err = json.NewDecoder(resp.Body).Decode(&result)
 		if err != nil {
 			return err
 		}
-		// log.Println(string(body))
+	}
 
-		err = json.Unmarshal(body, &result)
+	return nil
+}
+
+func (c *Client) requestMultipartPOST(path string, data map[string]string, file io.Reader, result interface{}) error {
+	fullURL := baseURL + path
+
+	// kinda janky
+	if strings.HasPrefix(path, "https://") {
+		fullURL = path
+	}
+
+	req, err := http.NewRequest(http.MethodPost, fullURL, nil)
+	if err != nil {
+		return err
+	}
+
+	buffer := &bytes.Buffer{}
+	w := multipart.NewWriter(buffer)
+
+	fw, err := w.CreateFormFile("file", "file.png")
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(fw, file)
+	if err != nil {
+		return err
+	}
+
+	for k, v := range data {
+		vw, err := w.CreateFormField(k)
 		if err != nil {
 			return err
 		}
-		// err = json.NewDecoder(resp.Body).Decode(&result)
-		// if err != nil {
-		// 	return err
-		// }
+
+		_, err = io.Copy(vw, bytes.NewReader([]byte(v)))
+		if err != nil {
+			return err
+		}
+	}
+
+	err = w.Close()
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	req.Body = io.NopCloser(buffer)
+
+	req.Header.Set("Authorization", "Bearer "+c.token)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if result != nil {
+		err = json.NewDecoder(resp.Body).Decode(&result)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
