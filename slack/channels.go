@@ -5,7 +5,7 @@ import "net/http"
 type ChannelID string
 
 func (c *Client) ListChannels() error {
-	err := c.request(http.MethodGet, "conversations.list", nil)
+	err := c.request(http.MethodGet, "conversations.list", nil, nil)
 	if err != nil {
 		return err
 	}
