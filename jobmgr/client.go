@@ -22,7 +22,7 @@ func NewClient() (*Client, error) {
 	return &Client{}, nil
 }
 
-func (c *Client) request(method string, path string, data url.Values, result interface{}) error {
+func (c *Client) requestRaw(method string, path string, data url.Values) (*http.Response, io.ReadCloser, error) {
 	fullURL := baseURL + path
 
 	if method == http.MethodGet {
@@ -33,7 +33,7 @@ func (c *Client) request(method string, path string, data url.Values, result int
 
 	req, err := http.NewRequest(method, fullURL, nil)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	if len(data) > 0 {
@@ -44,12 +44,21 @@ func (c *Client) request(method string, path string, data url.Values, result int
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
+		return nil, nil, err
+	}
+
+	return resp, resp.Body, nil
+}
+
+func (c *Client) request(method string, path string, data url.Values, result interface{}) error {
+	_, responseBody, err := c.requestRaw(method, path, data)
+	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer responseBody.Close()
 
 	if result != nil {
-		body, err := io.ReadAll(resp.Body)
+		body, err := io.ReadAll(responseBody)
 		if err != nil {
 			return err
 		}
