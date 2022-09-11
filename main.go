@@ -44,7 +44,9 @@ func genimage(command string, text string, c slack.CommandContext) (map[string]s
 		}
 
 		jobID, err := jobmgrClient.StartJob("sd-txt2img", map[string]string{
-			"prompt": text,
+			"prompt":        text,
+			"slackUserID":   c.UserID,
+			"slackUserName": c.UserName,
 		})
 		if err != nil {
 			panic(err)
