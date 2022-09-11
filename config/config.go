@@ -14,6 +14,9 @@ type Config struct {
 		SigningSecret  string
 		UserOAuthToken string
 	}
+	WebhookServer struct {
+		Port int
+	}
 }
 
 var Current Config
