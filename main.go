@@ -38,7 +38,7 @@ func genimage(command string, text string, c slack.CommandContext) (map[string]s
 			return
 		}
 
-		err = slackClient.ReactToMessage("thonk", commandMessage.TS, c.ChannelID)
+		err = slackClient.ReactToMessage("hourglass_flowing_sand", commandMessage.TS, c.ChannelID)
 		if err != nil {
 			panic(err)
 		}
@@ -52,6 +52,7 @@ func genimage(command string, text string, c slack.CommandContext) (map[string]s
 			panic(err)
 		}
 
+		started := false
 		for {
 			time.Sleep(2 * time.Second)
 
@@ -68,6 +69,11 @@ func genimage(command string, text string, c slack.CommandContext) (map[string]s
 				}
 
 				err = slackClient.UnreactToMessage("thonk", commandMessage.TS, c.ChannelID)
+				if err != nil {
+					panic(err)
+				}
+
+				err = slackClient.UnreactToMessage("hourglass_flowing_sand", commandMessage.TS, c.ChannelID)
 				if err != nil {
 					panic(err)
 				}
@@ -99,7 +105,25 @@ func genimage(command string, text string, c slack.CommandContext) (map[string]s
 					panic(err)
 				}
 
+				err = slackClient.UnreactToMessage("hourglass_flowing_sand", commandMessage.TS, c.ChannelID)
+				if err != nil {
+					panic(err)
+				}
+
 				break
+			} else if job.Status == jobmgr.JobStatusStarted && !started {
+				// it's started, change the emoji but don't stop the loop
+				started = true
+
+				err = slackClient.ReactToMessage("thonk", commandMessage.TS, c.ChannelID)
+				if err != nil {
+					panic(err)
+				}
+
+				err = slackClient.UnreactToMessage("hourglass_flowing_sand", commandMessage.TS, c.ChannelID)
+				if err != nil {
+					panic(err)
+				}
 			}
 		}
 	}()
