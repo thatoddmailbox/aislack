@@ -54,8 +54,6 @@ func genimage(command string, text string, c slack.CommandContext) (map[string]s
 
 		started := false
 		for {
-			time.Sleep(2 * time.Second)
-
 			job, _, artifacts, err := jobmgrClient.GetJob(jobID)
 			if err != nil {
 				panic(err)
@@ -125,6 +123,8 @@ func genimage(command string, text string, c slack.CommandContext) (map[string]s
 					panic(err)
 				}
 			}
+
+			time.Sleep(2 * time.Second)
 		}
 	}()
 
