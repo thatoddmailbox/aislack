@@ -3,6 +3,8 @@ A Slack bot that can generate AI art using the [Stable Diffusion](https://github
 
 It passes image requests to [jobmgr](https://github.com/thatoddmailbox/jobmgr), so the bot and the actual image generation can run on separate machines. (and so that you can share the GPU with other programs)
 
+![Selfportrait](./selfportrait.png)
+
 ## Things to do
 * Error handling
 * Randomize seed
