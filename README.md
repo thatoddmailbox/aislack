@@ -1,1 +1,2 @@
 # aislack
+A Slack bot that can generate AI art using the [Stable Diffusion](https://github.com/CompVis/stable-diffusion) model. Passes image requests to [jobmgr](https://github.com/thatoddmailbox/jobmgr), so the bot and the actual image generation can run on separate machines. (and so that you can share the GPU with other programs)
